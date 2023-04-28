@@ -1,0 +1,48 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>org.alibaba.plugins.kotlin</id>
+    <name>KtCodeHelper</name>
+    <vendor>Lilicheng</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="org.nissy.plugins.kotlin.services.MyApplicationService"/>
+        <projectService serviceImplementation="org.nissy.plugins.kotlin.services.KtCodeSytleProjectService"/>
+        <localInspection
+                language="kotlin"
+                displayName="Kotlin code style"
+                groupBundle="messages.InspectionsBundle"
+                groupKey="group.names.probable.bugs"
+                enabledByDefault="true"
+                implementationClass="org.nissy.plugins.kotlin.inspection.MainInspection"/>
+        <!--        <localInspection-->
+        <!--                language="kotlin"-->
+        <!--                displayName="Kotlin code style"-->
+        <!--                groupBundle="messages.InspectionsBundle"-->
+        <!--                groupKey="group.names.probable.bugs"-->
+        <!--                enabledByDefault="true"-->
+        <!--                implementationClass="org.nissy.plugins.kotlin.test.Test"/>-->
+    </extensions>
+
+    <applicationListeners>
+        <listener class="org.nissy.plugins.kotlin.listeners.MyProjectManagerListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+
+        <listener class="org.nissy.plugins.kotlin.listeners.MyProjectFileListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </applicationListeners>
+
+    <actions>
+        <action id="KtInspectionSwitchAction" class="org.nissy.plugins.kotlin.action.KtInspectionSwitchAction"
+                text="关闭实时检测">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action id="KtConfigPathAction" class="org.nissy.plugins.kotlin.action.KtConfigPathAction" text="Kotlin Lint Config">
+            <add-to-group group-id="KotlinToolsGroup" anchor="last"/>
+        </action>
+
+    </actions>
+</idea-plugin>
