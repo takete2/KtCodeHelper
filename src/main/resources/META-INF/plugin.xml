@@ -24,7 +24,7 @@
         <!--                groupBundle="messages.InspectionsBundle"-->
         <!--                groupKey="group.names.probable.bugs"-->
         <!--                enabledByDefault="true"-->
-        <!--                implementationClass="org.nissy.plugins.kotlin.test.Test"/>-->
+        <!--                implementationClass="org.nissy.plugins.kotlin.test.org.nissy.plugins.kotlin.Test"/>-->
     </extensions>
 
     <applicationListeners>
@@ -44,5 +44,9 @@
             <add-to-group group-id="KotlinToolsGroup" anchor="last"/>
         </action>
 
+        <action id="GenerateCodeTemplateAction" class="org.nissy.plugins.kotlin.action.GenerateCodeTemplateAction"
+                text="GenerateCodeTemplate">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>

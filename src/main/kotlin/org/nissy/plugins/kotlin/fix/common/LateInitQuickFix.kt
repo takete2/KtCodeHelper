@@ -2,10 +2,12 @@ package org.nissy.plugins.kotlin.fix.common
 
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import org.nissy.plugins.kotlin.notification.KtNotification
 import org.jetbrains.kotlin.psi.*
+import org.nissy.plugins.kotlin.notification.KtNotification
+
 
 /**
  * 修复lateinit
@@ -22,7 +24,6 @@ open class LateInitQuickFix : LocalQuickFix {
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val text = descriptor.psiElement.text
         val topExp = findTopExpr(descriptor.psiElement)
-
         val newExpression = KtPsiFactory(project).createExpression("::$text.isInitialized")
         if (topExp != null) {
             val newIdf = KtPsiFactory(project).createIf(

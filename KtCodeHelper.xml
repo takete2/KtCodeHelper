@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<templateSet group="KtCodeHelper">
+    <template description="hellloworld" name="hellloworld" toReformat="false" toShortenFQNames="true"
+              value="hellloworld">
+        <context>
+            <option name="JAVA_CODE" value="true"/>
+            <option name="KOTLIN" value="true"/>
+        </context>
+    </template>
+</templateSet>

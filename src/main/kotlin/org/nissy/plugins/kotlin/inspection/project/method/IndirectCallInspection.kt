@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.psi.*
  *  n.toUri("ttttt")
  *  }
  * 或者:
- *  class Test{
+ *  class org.nissy.plugins.kotlin.Test{
  *    val n = NavProviderProxy.getProxy(context)
  *    fun test(){
  *      n.toUri("ttttt")
