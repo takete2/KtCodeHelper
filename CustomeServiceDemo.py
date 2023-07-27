@@ -10,6 +10,7 @@ COMPLETION_MODEL = "text-davinci-003"
 embedding_model = "text-embedding-ada-002"
 app = Flask(__name__)
 
+#问答
 class Conversation:
     def __init__(self, prompt, num_of_round):
         self.prompt = prompt
@@ -43,7 +44,7 @@ class Conversation:
 
 #embedding
 batch_size = 20
-dfFileName = "Template_ Abbreviations_Describe.parquet"
+dfFileName = "_Abbreviations_Describe.parquet"
 #embedding 添加
 @backoff.on_exception(backoff.expo, openai.error.RateLimitError)
 def get_embeddings_with_backoff(prompts, engine):
@@ -53,10 +54,11 @@ def get_embeddings_with_backoff(prompts, engine):
         embeddings += get_embeddings(list_of_text=batch, engine=engine)
     return embeddings
 
-def add_embeddings_data_tofile(newdf,force):
+def add_embeddings_data_tofile(path,newdf,force):
     df = None
-    if os.path.exists(dfFileName):
-        df = pd.read_parquet(dfFileName)
+    filename = path + dfFileName
+    if os.path.exists(filename):
+        df = pd.read_parquet(filename)
         #判断之前是否有这个缩写
         abbreviations = df.abbreviation.tolist()
         for abbreviation in newdf.abbreviation.tolist():
@@ -67,9 +69,9 @@ def add_embeddings_data_tofile(newdf,force):
                 else:
                     newdf = newdf[newdf.abbreviation != abbreviation]
                     newdf.reset_index(drop=True, inplace=True)
-    return save_to_file(df,newdf)
+    return save_to_file(filename,df,newdf)
 
-def save_to_file(df,newdf):
+def save_to_file(filename,df,newdf):
     embeddings = []
     prompts = newdf.description.tolist()
     prompt_batches = [prompts[i:i+batch_size] for i in range(0, len(prompts), batch_size)]
@@ -78,14 +80,14 @@ def save_to_file(df,newdf):
         embeddings += batch_embeddings
     newdf["embedding"] = embeddings
     if df is None:
-        newdf.to_parquet(dfFileName, index=False)
+        newdf.to_parquet(filename, index=False)
     else:
         df = pd.concat([df, newdf], axis=0)
         resultdf = df.reset_index(drop=True)
-        resultdf.to_parquet(dfFileName, index=False)
+        resultdf.to_parquet(filename, index=False)
     return "success"
 
-#embedding
+#embedding 搜索
 def load_embeddings_to_faiss(df):
     embeddings = np.array(df['embedding'].tolist()).astype('float32')
     index = faiss.IndexFlatL2(embeddings.shape[1])
@@ -110,6 +112,7 @@ def set_openai_api_key(apikey):
     else:
         openai.api_key = os.environ.get("OPENAI_API_KEY")
 
+#简单对话
 def get_response(prompt):
     completions = openai.Completion.create (
         engine=COMPLETION_MODEL,
@@ -126,6 +129,7 @@ def get_response(prompt):
 requestTime = 0
 
 
+#服务部分
 @app.route('/question')
 def gen():
     prompt = request.args.get('prompt')
@@ -139,12 +143,14 @@ def gen():
 
 @app.route('/fembedding')
 def findTmpByEmbedding():
-    if not os.path.exists(dfFileName):
-        return '不存在任何模版数据'
     prompt = request.args.get('question')
     apiKey = request.args.get('apiKey')
+    path = request.args.get('path')
     set_openai_api_key(apiKey)
-    df = pd.read_parquet(dfFileName)
+    print(path + dfFileName)
+    if not os.path.exists(path + dfFileName):
+        return '不存在任何模版数据'
+    df = pd.read_parquet(path + dfFileName)
     index = load_embeddings_to_faiss(df)
     result = search_index(index,df,prompt,k=1)
 
@@ -157,10 +163,11 @@ def embedding():
     print("request.json : %s\n" % data)
     headers = request.headers
     apiKey = headers.get("apiKey")
+    path = headers.get("path")
     set_openai_api_key(apiKey)
     df = pd.DataFrame(data)
     print(df.head())
-    return add_embeddings_data_tofile(df,False)
+    return add_embeddings_data_tofile(path,df,False)
 
 @app.route('/force/embedding', methods=["POST"])
 def forceEmbeddings():
@@ -168,8 +175,9 @@ def forceEmbeddings():
     print("request.json : %s\n" % data)
     headers = request.headers
     apiKey = headers.get("apiKey")
+    path = headers.get("path")
     print("request.apikey : %s\n" % apiKey)
     set_openai_api_key(apiKey)
     df = pd.DataFrame(data)
     print(df.head())
-    return add_embeddings_data_tofile(df,True)
+    return add_embeddings_data_tofile(path,df,True)
