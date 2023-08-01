@@ -157,6 +157,8 @@ def findTmpByEmbedding():
     return result
 
 
+#data example：
+#{"abbreviation":["test"],"description":["descriptions test"]}
 @app.route('/embedding', methods=["POST"])
 def embedding():
     data = request.json
@@ -169,6 +171,8 @@ def embedding():
     print(df.head())
     return add_embeddings_data_tofile(path,df,False)
 
+#data example：
+#{"abbreviation":["test"],"description":["descriptions test"]}
 @app.route('/force/embedding', methods=["POST"])
 def forceEmbeddings():
     data = request.json
